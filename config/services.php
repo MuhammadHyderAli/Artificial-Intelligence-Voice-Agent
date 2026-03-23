@@ -33,12 +33,17 @@ return [
 
     'gemini' => [
         'api_key' => env('GEMINI_API_KEY'),
-        'model' => env('GEMINI_MODEL', 'gemini-2.0-flash'),
+        'model' => env('GEMINI_MODEL', 'gemini-1.5-flash'),
+    ],
+
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_MODEL', 'gpt-3.5-turbo'),
     ],
 
     'grok' => [
         'api_key' => env('XAI_API_KEY'),
-        'model' => env('XAI_MODEL', 'grok-4-latest'),
+        'model' => env('XAI_MODEL', 'grok-1.5-flash'),
     ],
 
     'twilio' => [

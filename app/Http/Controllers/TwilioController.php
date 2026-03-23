@@ -6,25 +6,43 @@ use App\Models\CallLog;
 use App\Models\ConversationMessage;
 use App\Models\Customer;
 use App\Services\CallLogService;
-use App\Services\GeminiService;
+// To use Gemini Service, uncomment the line below and comment out the OpenAIService line.
+// use App\Services\GeminiService;
+use App\Services\OpenAIService;
 use App\Services\TwilioService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
 class TwilioController extends Controller
 {
     public function __construct(
         protected TwilioService $twilioService,
         protected CallLogService $callLogService,
-        protected GeminiService $geminiService
+        // To use Gemini Service, comment out the OpenAIService line below and uncomment the GeminiService line.
+        // protected GeminiService $geminiService
+        protected OpenAIService $openAIService
     ) {}
 
     public function handleInbound(Request $request): Response
     {
         $callerNumber = $request->input('From', 'unknown');
+        Log::info('Incoming call from: ' . $callerNumber);
         $callSid = $request->input('CallSid', 'test-' . time());
 
-        $customer = Customer::where('phone', $callerNumber)->first();
+        $customer = null;
+        if (str_starts_with($callerNumber, 'sip:')) {
+            Log::info('Incoming call is from a SIP address. Associating with default customer for testing.');
+            // For testing purposes, we'll associate SIP calls with Customer 1.
+            // In a real-world scenario, you'd need a more robust way to map SIP users to customers.
+            $customer = Customer::find(1);
+        } else {
+            $normalizedPhone = $callerNumber;
+            if (!str_starts_with($normalizedPhone, '+')) {
+                $normalizedPhone = '+' . $normalizedPhone;
+            }
+            $customer = Customer::where('phone', $normalizedPhone)->first();
+        }
 
         $callLog = $this->callLogService->createLog(
             customerId: $customer?->id,
@@ -34,6 +52,7 @@ class TwilioController extends Controller
 
         session(['call_log_id' => $callLog->id]);
         session(['customer_id' => $customer?->id]);
+
 
         $twiml = $this->twilioService->buildGatherResponse(
             'Welcome! How can I help you today? Please speak your query.',
@@ -75,7 +94,9 @@ class TwilioController extends Controller
             ->map(fn ($m) => ['role' => $m->role, 'content' => $m->content])
             ->toArray();
 
-        $aiResponse = $this->geminiService->generateResponse($userSpeech, $context, $history);
+        // To use Gemini Service, comment out the OpenAIService line below and uncomment the GeminiService line.
+        // $aiResponse = $this->geminiService->generateResponse($userSpeech, $context, $history);
+        $aiResponse = $this->openAIService->generateResponse($userSpeech, $context, $history);
 
         $this->callLogService->addMessage($callLogId, 'assistant', $aiResponse);
 
