@@ -58,4 +58,13 @@ class TwilioService
         $message = htmlspecialchars($message, ENT_XML1 | ENT_QUOTES, 'UTF-8');
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response><Say voice=\"Polly.Joanna\">{$message}</Say></Response>";
     }
+
+    public function buildHangupResponse(string $message): string
+    {
+        $message = htmlspecialchars($message, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response>"
+            . "<Say voice=\"Polly.Joanna\">{$message}</Say>"
+            . "<Hangup/>"
+            . "</Response>";
+    }
 }
