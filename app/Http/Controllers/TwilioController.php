@@ -2,35 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Ai\Agents\CustomerSupportAgent;
 use App\Models\CallLog;
-use App\Models\ConversationMessage;
 use App\Models\Customer;
 use App\Services\CallLogService;
-use App\Services\OpenAIService;
 use App\Services\TwilioService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Log;
 
 class TwilioController extends Controller
 {
     public function __construct(
         protected TwilioService $twilioService,
-        protected CallLogService $callLogService,
-        protected OpenAIService $openAIService
+        protected CallLogService $callLogService
     ) {}
 
     public function handleInbound(Request $request): Response
     {
         $callerNumber = $request->input('From', 'unknown');
         $callSid = $request->input('CallSid', 'test-' . time());
-
-        $customer = null;
-        if (str_starts_with($callerNumber, 'sip:')) {
-            $customer = Customer::find(1);
-        } else {
-            $normalizedPhone = str_starts_with($callerNumber, '+') ? $callerNumber : '+' . $callerNumber;
-            $customer = Customer::where('phone', $normalizedPhone)->first();
+        $customer = Customer::find(1); 
+        
+        if (!$customer) {
+            $customer = Customer::first();
         }
 
         $callLog = $this->callLogService->createLog(
@@ -89,25 +83,16 @@ class TwilioController extends Controller
         }
 
         $this->callLogService->addMessage($callLogId, 'user', $userSpeech);
-
         $customer = $customerId ? Customer::find($customerId) : null;
-        $context = [
-            'customer_name' => $customer?->name ?? 'Guest',
-            'orders' => $customer?->orders()->latest()->take(3)->get()->toArray() ?? [],
-            'tickets' => $customer?->tickets()->latest()->take(3)->get()->toArray() ?? [],
-        ];
 
-        $history = ConversationMessage::where('call_log_id', $callLogId)
-            ->orderBy('created_at')
-            ->get()
-            ->map(fn ($m) => ['role' => $m->role, 'content' => $m->content])
-            ->toArray();
+        $agent = new CustomerSupportAgent($customer, $callLogId);
+        
+        $aiResponse = $agent->prompt($userSpeech);
 
-        $aiResponse = $this->openAIService->generateResponse($userSpeech, $context, $history);
-        $this->callLogService->addMessage($callLogId, 'assistant', $aiResponse);
+        $this->callLogService->addMessage($callLogId, 'assistant', (string) $aiResponse);
 
         $twiml = $this->twilioService->buildContinueResponse(
-            $aiResponse,
+            (string) $aiResponse,
             route('twilio.process-speech')
         );
 

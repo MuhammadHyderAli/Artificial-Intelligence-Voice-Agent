@@ -26,4 +26,20 @@ class TicketService
             ->orderByDesc('created_at')
             ->get();
     }
+
+    public function getTicketById(int $customerId, int $ticketId): ?Ticket
+    {
+        return Ticket::where('customer_id', $customerId)
+            ->where('id', $ticketId)
+            ->first();
+    }
+
+    public function updateTicketStatus(int $customerId, int $ticketId, string $newStatus): bool
+    {
+        $ticket = $this->getTicketById($customerId, $ticketId);
+        if ($ticket) {
+            return $ticket->update(['status' => $newStatus]);
+        }
+        return false;
+    }
 }

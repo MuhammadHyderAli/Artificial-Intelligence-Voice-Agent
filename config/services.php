@@ -29,23 +29,6 @@ return [
         ],
     ],
 
-    'ai_driver' => env('AI_DRIVER', 'gemini'),
-
-    'gemini' => [
-        'api_key' => env('GEMINI_API_KEY'),
-        'model' => env('GEMINI_MODEL', 'gemini-1.5-flash'),
-    ],
-
-    'openai' => [
-        'api_key' => env('OPENAI_API_KEY'),
-        'model' => env('OPENAI_MODEL', 'gpt-3.5-turbo'),
-    ],
-
-    'grok' => [
-        'api_key' => env('XAI_API_KEY'),
-        'model' => env('XAI_MODEL', 'grok-1.5-flash'),
-    ],
-
     'twilio' => [
         'sid' => env('TWILIO_SID'),
         'token' => env('TWILIO_AUTH_TOKEN'),
