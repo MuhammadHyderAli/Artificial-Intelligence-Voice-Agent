@@ -21,7 +21,7 @@ class TwilioService
         $actionUrl = htmlspecialchars($actionUrl, ENT_XML1 | ENT_QUOTES, 'UTF-8');
         
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response>"
-            . "<Gather input=\"speech\" action=\"{$actionUrl}\" timeout=\"5\" speechTimeout=\"auto\">"
+            . "<Gather input=\"speech\" action=\"{$actionUrl}\" timeout=\"20\" speechTimeout=\"auto\">"
             . "<Say voice=\"Polly.Joanna\">{$promptMessage}</Say>"
             . "</Gather>"
             . "<Say voice=\"Polly.Joanna\">We did not receive any input. Goodbye.</Say>"
@@ -34,7 +34,7 @@ class TwilioService
         $goodbye = htmlspecialchars('Thank you for calling. Goodbye.', ENT_XML1 | ENT_QUOTES, 'UTF-8');
         
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response>"
-            . "<Gather input=\"speech\" action=\"{$actionUrl}\" timeout=\"5\" speechTimeout=\"auto\">"
+            . "<Gather input=\"speech\" action=\"{$actionUrl}\" timeout=\"20\" speechTimeout=\"auto\">"
             . "<Say voice=\"Polly.Joanna\">{$aiMessage}</Say>"
             . "</Gather>"
             . "<Say voice=\"Polly.Joanna\">We did not receive any input. {$goodbye}</Say>"

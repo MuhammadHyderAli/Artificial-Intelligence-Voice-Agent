@@ -16,9 +16,26 @@ class OrderService
 
     public function getOrderByNumber(int $customerId, string $orderNumber): ?Order
     {
-        return Order::where('customer_id', $customerId)
-            ->where('order_number', $orderNumber)
-            ->first();
+        $cleanInput = preg_replace('/[^A-Z0-9]/', '', strtoupper($orderNumber));
+
+        $orders = Order::where('customer_id', $customerId)->get();
+
+        return $orders->first(function ($order) use ($cleanInput) {
+            $cleanOrderNumber = preg_replace('/[^A-Z0-9]/', '', strtoupper($order->order_number));
+
+            if ($cleanOrderNumber === $cleanInput) {
+                return true;
+            }
+
+            if (str_starts_with($cleanOrderNumber, 'ORD')) {
+                $withoutOrd = substr($cleanOrderNumber, 3);
+                if ($withoutOrd === $cleanInput) {
+                    return true;
+                }
+            }
+
+            return false;
+        });
     }
 
     public function createOrder(int $customerId, float $amount): Order
