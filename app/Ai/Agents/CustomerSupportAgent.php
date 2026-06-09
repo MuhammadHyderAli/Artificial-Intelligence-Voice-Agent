@@ -7,6 +7,8 @@ use App\Ai\Tools\UpdateOrderStatus;
 use App\Ai\Tools\CreateTicket;
 use App\Ai\Tools\GetOpenTickets;
 use App\Ai\Tools\CreateOrder;
+use App\Ai\Tools\DeleteOrder;
+use App\Ai\Tools\UpdateTicketStatus;
 use App\Models\Customer;
 use App\Models\ConversationMessage;
 use Laravel\Ai\Contracts\Agent;
@@ -54,6 +56,8 @@ class CustomerSupportAgent implements Agent, Conversational, HasTools
             new CreateTicket($this->customer?->id),
             new GetOpenTickets($this->customer?->id),
             new CreateOrder($this->customer?->id),
+            new DeleteOrder($this->customer?->id),
+            new UpdateTicketStatus($this->customer?->id),
         ];
     }
 }

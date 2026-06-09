@@ -10,11 +10,7 @@ use Stringable;
 
 class DeleteOrder implements Tool
 {
-    // Inject the OrderService alongside your optional customer ID
-    public function __construct(
-        protected ?int $customerId,
-        protected OrderService $orderService
-    ) {}
+    public function __construct(protected ?int $customerId) {}
 
     public function signature(): string
     {
@@ -29,7 +25,7 @@ class DeleteOrder implements Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'order_number' => $schema->string()->description('The unique order number to delete.'),
+            'orderNumber' => $schema->string()->description('The unique order number to delete.'),
         ];
     }
 
@@ -38,9 +34,12 @@ class DeleteOrder implements Tool
         if (!$this->customerId) {
             return "Cannot delete order: No verified customer profile found.";
         }
-        $success = $this->orderService->deleteOrder($this->customerId, $request['order_number']);
+        
+        $orderNumber = $request['orderNumber'];
+        $success = app(OrderService::class)->deleteOrder($this->customerId, $orderNumber);
+        
         return $success
-            ? "Successfully canceled and deleted order {$request['order_number']}."
-            : "Could not find an active order with the number {$request['order_number']} associated with your account.";
+            ? "Successfully canceled and deleted order {$orderNumber}."
+            : "Could not find an active order with the number {$orderNumber} associated with your account.";
     }
 }
