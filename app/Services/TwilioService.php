@@ -21,7 +21,7 @@ class TwilioService
         $actionUrl = htmlspecialchars($actionUrl, ENT_XML1 | ENT_QUOTES, 'UTF-8');
         
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response>"
-            . "<Gather input=\"speech\" action=\"{$actionUrl}\" timeout=\"20\" speechTimeout=\"auto\">"
+            . "<Gather input=\"speech\" action=\"{$actionUrl}\" timeout=\"20\" speechTimeout=\"2\">"
             . "<Say voice=\"Polly.Matthew-Neural\">{$promptMessage}</Say>"
             . "</Gather>"
             . "<Say voice=\"Polly.Matthew-Neural\">We did not receive any input. Goodbye.</Say>"
@@ -34,10 +34,11 @@ class TwilioService
         $goodbye = htmlspecialchars('Thank you for calling. Goodbye.', ENT_XML1 | ENT_QUOTES, 'UTF-8');
         
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response>"
-            . "<Gather input=\"speech\" action=\"{$actionUrl}\" timeout=\"20\" speechTimeout=\"auto\">"
+            . "<Gather input=\"speech\" action=\"{$actionUrl}\" timeout=\"20\" speechTimeout=\"2\">"
             . "<Say voice=\"Polly.Matthew-Neural\">{$aiMessage}</Say>"
             . "</Gather>"
             . "<Say voice=\"Polly.Matthew-Neural\">We did not receive any input. {$goodbye}</Say>"
+            . "<Pause length=\"2\"/>"
             . "<Hangup/>"
             . "</Response>";
     }
@@ -51,6 +52,7 @@ class TwilioService
         $message = htmlspecialchars($message, ENT_XML1 | ENT_QUOTES, 'UTF-8');
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response>"
             . "<Say voice=\"Polly.Matthew-Neural\">{$message}</Say>"
+            . "<Pause length=\"2\"/>"
             . "<Hangup/>"
             . "</Response>";
     }
