@@ -49,4 +49,10 @@ class OrderService
         $order = $this->getOrderByNumber($customerId, $orderNumber);
         return $order ? $order->delete() : false;
     }
+
+    public function updateOrderAmount(int $customerId, string $orderNumber, float $newAmount): bool
+    {
+        $order = $this->getOrderByNumber($customerId, $orderNumber);
+        return $order ? $order->update(['amount' => $newAmount]) : false;
+    }
 }

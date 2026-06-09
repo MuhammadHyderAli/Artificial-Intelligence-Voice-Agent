@@ -14,12 +14,12 @@ class GetOpenTickets implements Tool
 
     public function signature(): string
     {
-        return 'get_open_tickets()';
+        return 'get_open_tickets(string $issueType = null)';
     }
 
     public function description(): Stringable|string
     {
-        return 'Check if the customer has any open or in-progress support tickets.';
+        return 'Check if the customer has any open or in-progress support tickets, optionally filtering by issue type.';
     }
 
     public function handle(Request $request): Stringable|string
@@ -28,20 +28,24 @@ class GetOpenTickets implements Tool
             return "Cannot fetch tickets: No verified customer profile found.";
         }
 
-        $tickets = app(TicketService::class)->getOpenTickets($this->customerId);
+        $issueType = $request['issueType'] ?? null;
+        $tickets = app(TicketService::class)->getOpenTickets($this->customerId, $issueType);
         
         if ($tickets->isEmpty()) {
-            return "The customer currently has no open support tickets.";
+            $filterMsg = $issueType ? " for issue type '{$issueType}'" : "";
+            return "The customer currently has no open support tickets{$filterMsg}.";
         }
 
         $ticketList = $tickets->map(function ($ticket) {
-            return "Ticket #{$ticket->id} ({$ticket->issue_type}): Status is {$ticket->status}.";
+            return "Ticket #{$ticket->id} ({$ticket->issue_type}): Status is {$ticket->status}. Description: {$ticket->description}";
         })->join(' | ');
 
         return "Found open tickets: " . $ticketList;
     }
     public function schema(JsonSchema $schema): array
     {
-        return [];
+        return [
+            'issueType' => $schema->string()->description('Optional issue type category (e.g. billing, shipping, technical) to filter by.'),
+        ];
     }
 }

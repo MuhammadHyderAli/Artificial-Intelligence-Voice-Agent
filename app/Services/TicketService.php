@@ -16,15 +16,16 @@ class TicketService
         ]);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Ticket>
-     */
-    public function getOpenTickets(int $customerId)
+    public function getOpenTickets(int $customerId, ?string $issueType = null)
     {
-        return Ticket::where('customer_id', $customerId)
-            ->whereIn('status', ['open', 'in_progress'])
-            ->orderByDesc('created_at')
-            ->get();
+        $query = Ticket::where('customer_id', $customerId)
+            ->whereIn('status', ['open', 'in_progress']);
+
+        if ($issueType) {
+            $query->where('issue_type', $issueType);
+        }
+
+        return $query->orderByDesc('created_at')->get();
     }
 
     public function getTicketById(int $customerId, int $ticketId): ?Ticket
@@ -39,6 +40,20 @@ class TicketService
         $ticket = $this->getTicketById($customerId, $ticketId);
         if ($ticket) {
             return $ticket->update(['status' => $newStatus]);
+        }
+        return false;
+    }
+
+    public function updateTicketDescriptionByIssueType(int $customerId, string $issueType, string $newDescription): bool
+    {
+        $ticket = Ticket::where('customer_id', $customerId)
+            ->where('issue_type', $issueType)
+            ->whereIn('status', ['open', 'in_progress'])
+            ->latest()
+            ->first();
+
+        if ($ticket) {
+            return $ticket->update(['description' => $newDescription]);
         }
         return false;
     }
