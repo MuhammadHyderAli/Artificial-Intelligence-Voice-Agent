@@ -22,9 +22,9 @@ class TwilioService
         
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response>"
             . "<Gather input=\"speech\" action=\"{$actionUrl}\" timeout=\"20\" speechTimeout=\"auto\">"
-            . "<Say voice=\"Polly.Joanna\">{$promptMessage}</Say>"
+            . "<Say voice=\"Polly.Matthew-Neural\">{$promptMessage}</Say>"
             . "</Gather>"
-            . "<Say voice=\"Polly.Joanna\">We did not receive any input. Goodbye.</Say>"
+            . "<Say voice=\"Polly.Matthew-Neural\">We did not receive any input. Goodbye.</Say>"
             . "</Response>";
     }
     public function buildContinueResponse(string $aiMessage, string $actionUrl): string
@@ -35,22 +35,22 @@ class TwilioService
         
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response>"
             . "<Gather input=\"speech\" action=\"{$actionUrl}\" timeout=\"20\" speechTimeout=\"auto\">"
-            . "<Say voice=\"Polly.Joanna\">{$aiMessage}</Say>"
+            . "<Say voice=\"Polly.Matthew-Neural\">{$aiMessage}</Say>"
             . "</Gather>"
-            . "<Say voice=\"Polly.Joanna\">We did not receive any input. {$goodbye}</Say>"
+            . "<Say voice=\"Polly.Matthew-Neural\">We did not receive any input. {$goodbye}</Say>"
             . "<Hangup/>"
             . "</Response>";
     }
     public function buildVoiceResponse(string $message): string
     {
         $message = htmlspecialchars($message, ENT_XML1 | ENT_QUOTES, 'UTF-8');
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response><Say voice=\"Polly.Joanna\">{$message}</Say></Response>";
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response><Say voice=\"Polly.Matthew-Neural\">{$message}</Say></Response>";
     }
     public function buildHangupResponse(string $message): string
     {
         $message = htmlspecialchars($message, ENT_XML1 | ENT_QUOTES, 'UTF-8');
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response>"
-            . "<Say voice=\"Polly.Joanna\">{$message}</Say>"
+            . "<Say voice=\"Polly.Matthew-Neural\">{$message}</Say>"
             . "<Hangup/>"
             . "</Response>";
     }

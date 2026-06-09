@@ -39,8 +39,7 @@ class CreateOrder implements Tool
 
         $amount = $request['amount'];
 
-        $orderNumber = 'ORD-' . strtoupper(Str::random(8));
-
+        $orderNumber = 'ORD-' . strtoupper(Str::random(2)) . '-' . rand(1, 9);
         $order = Order::create([
             'customer_id' => $this->customerId,
             'order_number' => $orderNumber,

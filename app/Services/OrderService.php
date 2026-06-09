@@ -17,25 +17,14 @@ class OrderService
     public function getOrderByNumber(int $customerId, string $orderNumber): ?Order
     {
         $cleanInput = preg_replace('/[^A-Z0-9]/', '', strtoupper($orderNumber));
-
-        $orders = Order::where('customer_id', $customerId)->get();
-
-        return $orders->first(function ($order) use ($cleanInput) {
-            $cleanOrderNumber = preg_replace('/[^A-Z0-9]/', '', strtoupper($order->order_number));
-
-            if ($cleanOrderNumber === $cleanInput) {
-                return true;
-            }
-
-            if (str_starts_with($cleanOrderNumber, 'ORD')) {
-                $withoutOrd = substr($cleanOrderNumber, 3);
-                if ($withoutOrd === $cleanInput) {
-                    return true;
+        return Order::where('customer_id', $customerId)
+            ->where(function ($query) use ($cleanInput) {
+                $query->whereRaw("REPLACE(REPLACE(UPPER(order_number), '-', ''), '_', '') = ?", [$cleanInput]);
+                if (!str_starts_with($cleanInput, 'ORD')) {
+                    $query->orWhereRaw("REPLACE(REPLACE(UPPER(order_number), '-', ''), '_', '') = ?", ['ORD' . $cleanInput]);
                 }
-            }
-
-            return false;
-        });
+            })
+            ->first();
     }
 
     public function createOrder(int $customerId, float $amount): Order
@@ -52,10 +41,7 @@ class OrderService
     public function updateOrderStatus(int $customerId, string $orderNumber, string $newStatus): bool
     {
         $order = $this->getOrderByNumber($customerId, $orderNumber);
-        if ($order) {
-            return $order->update(['status' => $newStatus]);
-        }
-        return false;
+        return $order ? $order->update(['status' => $newStatus]) : false;
     }
 
     public function deleteOrder(int $customerId, string $orderNumber): bool
